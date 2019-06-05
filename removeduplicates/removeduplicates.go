@@ -6,23 +6,17 @@ import (
 	"io"
 	"log"
 	"os"
-	"sort"
 )
 
 func uniques(r io.Reader) []string {
 	lines := make([]string, 0, 10)
-	sortedLines := make([]string, 0, 10)
+	uniqueLines := make(map[string]bool)
 
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		line := scanner.Text()
-		i := sort.SearchStrings(sortedLines, line)
-		if i == len(sortedLines) || sortedLines[i] != line {
-			// line not found - add it
-			sortedLines = append(sortedLines, "")
-			copy(sortedLines[i+1:], sortedLines[i:])
-			sortedLines[i] = line
-
+		if _, ok := uniqueLines[line]; !ok {
+			uniqueLines[line] = true
 			lines = append(lines, line)
 		}
 	}
