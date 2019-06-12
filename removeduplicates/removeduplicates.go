@@ -10,13 +10,13 @@ import (
 
 func uniques(r io.Reader) []string {
 	lines := make([]string, 0, 10)
-	uniqueLines := make(map[string]bool)
+	seen := make(map[string]struct{})
 
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if _, ok := uniqueLines[line]; !ok {
-			uniqueLines[line] = true
+		if _, ok := seen[line]; !ok {
+			seen[line] = struct{}{}
 			lines = append(lines, line)
 		}
 	}
