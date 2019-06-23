@@ -33,12 +33,12 @@ func uniqueFile(file string) error {
 	lines := uniques(f)
 
 	f, err = os.Create(file)
-	buf := bufio.NewWriter(f)
 	if err != nil {
 		return fmt.Errorf("couldn't create file '%s': %v", file, err)
 	}
 	defer f.Close()
 
+	buf := bufio.NewWriter(f)
 	for _, l := range lines {
 		if _, err = fmt.Fprintln(buf, l); err != nil {
 			return fmt.Errorf("couldn't write file '%s': %v", file, err)
