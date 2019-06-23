@@ -40,9 +40,13 @@ func uniqueFile(file string) error {
 	defer f.Close()
 
 	for _, l := range lines {
-		fmt.Fprintln(buf, l)
+		if _, err = fmt.Fprintln(buf, l); err != nil {
+			return fmt.Errorf("couldn't write file '%s': %v", file, err)
+		}
 	}
-	buf.Flush()
+	if err = buf.Flush(); err != nil {
+		return fmt.Errorf("couldn't flush buffer '%s': %v", file, err)
+	}
 	if err = f.Close(); err != nil {
 		return fmt.Errorf("couldn't close file '%s': %v", file, err)
 	}
