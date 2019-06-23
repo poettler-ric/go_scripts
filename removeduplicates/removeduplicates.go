@@ -24,28 +24,27 @@ func uniques(r io.Reader) []string {
 }
 
 func uniqueFile(file string) error {
-	f, err := os.OpenFile(file, os.O_RDWR, 0644)
+	f, err := os.Open(file)
 	if err != nil {
-		return fmt.Errorf("couldn't open file %s: %v", file, err)
+		return fmt.Errorf("couldn't open file '%s': %v", file, err)
 	}
 	defer f.Close()
 
 	lines := uniques(f)
-	// write unique lines
-	if _, err = f.Seek(io.SeekStart, 0); err != nil {
-		return fmt.Errorf("couldn't jump to beginning of %s: %v", file, err)
+
+	f, err = os.Create(file)
+	if err != nil {
+		return fmt.Errorf("couldn't create file '%s': %v", file, err)
 	}
+	defer f.Close()
+
 	for _, l := range lines {
 		fmt.Fprintln(f, l)
 	}
-	// set new filesize
-	pos, err := f.Seek(io.SeekStart, io.SeekCurrent)
-	if err != nil {
-		return fmt.Errorf("couldn't determine position of %s: %v", file, err)
+	if err = f.Close(); err != nil {
+		return fmt.Errorf("couldn't close file '%s': %v", file, err)
 	}
-	if err = f.Truncate(pos); err != nil {
-		return fmt.Errorf("couldn't truncate file %s: %v", file, err)
-	}
+
 	return nil
 }
 
