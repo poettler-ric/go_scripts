@@ -23,17 +23,17 @@ func uniques(r io.Reader) []string {
 	return lines
 }
 
-func uniqueFile(file string) {
+func uniqueFile(file string) error {
 	f, err := os.OpenFile(file, os.O_RDWR, 0644)
 	if err != nil {
-		log.Fatalf("couldn't open file %s: %v", file, err)
+		return fmt.Errorf("couldn't open file %s: %v", file, err)
 	}
 	defer f.Close()
 
 	lines := uniques(f)
 	// write unique lines
 	if _, err = f.Seek(io.SeekStart, 0); err != nil {
-		log.Fatalf("couldn't jump to beginning of %s: %v", file, err)
+		return fmt.Errorf("couldn't jump to beginning of %s: %v", file, err)
 	}
 	for _, l := range lines {
 		fmt.Fprintln(f, l)
@@ -41,18 +41,21 @@ func uniqueFile(file string) {
 	// set new filesize
 	pos, err := f.Seek(io.SeekStart, io.SeekCurrent)
 	if err != nil {
-		log.Fatalf("couldn't determine position of %s: %v", file, err)
+		return fmt.Errorf("couldn't determine position of %s: %v", file, err)
 	}
 	if err = f.Truncate(pos); err != nil {
-		log.Fatalf("couldn't truncate file %s: %v", file, err)
+		return fmt.Errorf("couldn't truncate file %s: %v", file, err)
 	}
+	return nil
 }
 
 func main() {
 	if len(os.Args) > 1 {
 		// read and write files in succession
 		for _, f := range os.Args[1:] {
-			uniqueFile(f)
+			if err := uniqueFile(f); err != nil {
+				log.Fatalf("error while handling '%s': %v", f, err)
+			}
 		}
 	} else {
 		// read stdin, write stdout
